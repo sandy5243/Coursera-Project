@@ -7,9 +7,13 @@ library(corrplot)
 library(rattle)
 
 # Downloading the Dataset
+
 trainurl = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+
 testurl = "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
 train_data = read.csv(url(trainurl), na.strings=c("NA","#DIV/0!",""))
+
 test_data = read.csv(url(testurl), na.strings=c("NA","#DIV/0!",""))
 
 dim(train_data)
@@ -23,26 +27,32 @@ sum(complete.cases(train_data))
 # Removing Columns that contain Missing values
 
 train_data = train_data[, colSums(is.na(train_data)) == 0] 
+
 test_data = test_data[, colSums(is.na(test_data)) == 0]
 
 # Removing columns that do not contribute much to the accelerometer measurements.
 
 classe = train_data$classe
+
 trainRemove = grepl("^X|timestamp|window", names(train_data))
+
 train_data = train_data[, !trainRemove]
 
 testRemove = grepl("^X|timestamp|window", names(test_data))
+
 test_data = test_data[, !testRemove]
 
 #Converting to Numeric and adding back Classe to Train data
 
 trainCleaned = train_data[, sapply(train_data, is.numeric)]
+
 trainCleaned$classe = classe
 
 testCleaned = test_data[, sapply(test_data, is.numeric)]
 
 
 # Data Slicing
+
 # Lets split the data into a pure training dataset of 70% and validation set of 30%.We will use validation dataset to conduct cross validation.
 
 set.seed(12345) # For reproducibile purpose
@@ -73,7 +83,10 @@ accuracy = postResample(predictRf, testData$classe)
 
 accuracy
 
+#Checking for out of sample error. As we have used Cross Validation the error is expected to be very less
+
 oose <- 1 - as.numeric(confusionMatrix(testData$classe, predictRf)$overall[1])
+
 oose
 
 # Predicting for Actual Test Data Set
@@ -93,13 +106,10 @@ tree_rpart <- rpart(classe ~ ., data=trainData, method="class")
 
 fancyRpartPlot(tree_rpart) 
 
-
-
-
 # Correlation Matrix Visualization
+
 corrPlot = cor(trainData[, -length(names(trainData))])
 
 corrplot(corrPlot, method="color")
-
 
 
